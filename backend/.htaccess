@@ -1,0 +1,20 @@
+# ── Passenger / Node.js app wiring ───────────────────────────────────────────
+# cPanel's Passenger reads these directives to know which Node binary and entry
+# point to use.  The paths use YOUR cPanel username — replace "cpanelusername"
+# everywhere below with your actual cPanel username.
+PassengerEnabled on
+PassengerAppRoot /home/cpanelusername/free-store
+PassengerStartupFile dist/app.js
+PassengerNodejs /home/cpanelusername/nodevenv/free-store/20/bin/node
+
+# ── Force HTTPS ───────────────────────────────────────────────────────────────
+RewriteEngine On
+RewriteCond %{HTTPS} off
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# ── Raise body-size limit for large file uploads ──────────────────────────────
+# 1 GB = 1073741824 bytes  (matches MAX_FILE_SIZE_MB=1024 in .env)
+LimitRequestBody 1073741824
+
+# ── Prevent Apache timeouts on chunked / large uploads ───────────────────────
+TimeOut 300

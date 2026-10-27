@@ -1,0 +1,19 @@
+{
+  "name": "free-store",
+  "version": "1.0.0",
+  "description": "GitHub Encrypted Store - secure file storage using GitHub as encrypted backend",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend"
+  ],
+  "scripts": {
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "build": "npm run build --workspace=frontend && npm run build --workspace=backend && node scripts/copy-frontend.js",
+    "start": "npm run start --workspace=backend"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

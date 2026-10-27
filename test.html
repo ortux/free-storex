@@ -1,0 +1,434 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='12' fill='%23000'/%3E%3Cpath d='M32 8 58 54H6z' fill='none' stroke='%23ededed' stroke-width='5'/%3E%3C/svg%3E" />
+<title>Freestore API Tester</title>
+<style>
+:root{
+  --bg:#000;--bg2:#0a0a0a;--bg3:#111;--line:#262626;--line2:#404040;
+  --fg:#ededed;--mut:#a1a1a1;--dim:#6b6b6b;
+  --ok:#50e3c2;--err:#ff4d4f;--run:#0070f3;--warn:#f5a623;
+  --btn:#ededed;--btnfg:#000;
+  --sans:Inter,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+@media (prefers-color-scheme:light){
+  :root:not([data-theme="dark"]){
+    --bg:#fff;--bg2:#fafafa;--bg3:#f2f2f2;--line:#eaeaea;--line2:#c9c9c9;
+    --fg:#171717;--mut:#666;--dim:#8f8f8f;--ok:#0a8f6a;--err:#d1242f;--run:#0070f3;--warn:#a15c00;
+    --btn:#171717;--btnfg:#fff;
+  }
+}
+*{box-sizing:border-box;margin:0}
+body{font-family:var(--sans);background:var(--bg);color:var(--fg);font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh}
+code,pre,.mono{font-family:var(--mono)}
+header{border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--bg);z-index:5}
+.wrap{max-width:1120px;margin:0 auto;padding:0 20px}
+.bar{display:flex;align-items:center;gap:12px;height:56px}
+.logo{width:0;height:0;border-left:9px solid transparent;border-right:9px solid transparent;border-bottom:16px solid var(--fg)}
+.bar h1{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.sep{color:var(--line2)}
+.bar .sub{color:var(--mut);font-size:13px}
+.sp{flex:1}
+.pill{border:1px solid var(--line);border-radius:999px;padding:2px 10px;font-size:12px;color:var(--mut)}
+main{display:grid;grid-template-columns:minmax(0,2fr) minmax(0,3fr);gap:24px;padding:32px 0 56px;align-items:start}
+@media(max-width:860px){main{grid-template-columns:1fr}.bar .sub,.sep{display:none}}
+.col{display:flex;flex-direction:column;gap:16px;min-width:0}
+.card{border:1px solid var(--line);border-radius:8px;background:var(--bg2)}
+.card>.hd{padding:16px 20px;border-bottom:1px solid var(--line)}
+.card>.hd h2{font-size:15px;font-weight:600;letter-spacing:-.01em}
+.card>.hd p{color:var(--mut);font-size:13px;margin-top:2px}
+.card>.bd{padding:20px}
+label.l{display:block;font-size:13px;font-weight:500;margin-bottom:6px}
+.field{margin-bottom:16px}.field:last-child{margin-bottom:0}
+.help{font-size:12px;color:var(--dim);margin-top:6px}
+.help.warn{color:var(--warn)}
+.row{display:flex;gap:8px}
+input[type=text],input[type=password],input:not([type]){width:100%;min-width:0;height:36px;padding:0 12px;border:1px solid var(--line);border-radius:6px;background:var(--bg);color:var(--fg);font:inherit;font-size:13px;outline:0;transition:border-color .15s,box-shadow .15s}
+input:hover{border-color:var(--line2)}
+input:focus{border-color:var(--fg);box-shadow:0 0 0 3px color-mix(in srgb,var(--fg) 14%,transparent)}
+button{font:inherit;font-size:13px;font-weight:500;height:36px;padding:0 14px;border-radius:6px;border:1px solid var(--line);background:var(--bg);color:var(--fg);cursor:pointer;transition:background .15s,border-color .15s,opacity .15s}
+button:hover:not(:disabled){background:var(--bg3);border-color:var(--line2)}
+button:focus-visible,.drop:focus-within{outline:2px solid var(--run);outline-offset:2px}
+button:disabled{opacity:.45;cursor:not-allowed}
+button.primary{background:var(--btn);color:var(--btnfg);border-color:var(--btn)}
+button.primary:hover:not(:disabled){background:var(--btn);opacity:.85}
+button.block{width:100%}
+button.link{border:0;background:none;color:var(--mut);height:28px}
+button.link:hover:not(:disabled){background:none;color:var(--fg)}
+.drop{display:block;border:1px dashed var(--line2);border-radius:8px;padding:28px 16px;text-align:center;cursor:pointer;transition:border-color .15s,background .15s}
+.drop:hover,.drop.over{border-color:var(--fg);background:var(--bg3)}
+.drop b{display:block;font-weight:500}
+.drop span{color:var(--mut);font-size:13px}
+.drop input{display:none}
+.file{display:flex;align-items:center;gap:12px;margin-top:12px;padding:10px 12px;border:1px solid var(--line);border-radius:6px;background:var(--bg)}
+.file[hidden]{display:none}
+.file .nm{font-size:13px;font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.file .mt{font-size:12px;color:var(--mut)}
+.file>div{flex:1;min-width:0}
+.prog{margin-top:20px}
+.prog .t{display:flex;justify-content:space-between;font-size:12px;color:var(--mut);margin-bottom:8px}
+.track{height:4px;border-radius:4px;background:var(--line);overflow:hidden}
+.track i{display:block;height:100%;width:0;background:var(--fg);transition:width .15s}
+.acts{display:grid;gap:8px;margin-top:20px}
+.badge{display:inline-flex;align-items:center;gap:8px;border:1px solid var(--line);border-radius:999px;padding:3px 12px 3px 10px;font-size:12px;color:var(--mut);white-space:nowrap}
+.badge:before{content:"";width:8px;height:8px;border-radius:50%;background:var(--dim)}
+.badge.running:before{background:var(--run);animation:pulse 1.2s ease-in-out infinite}
+.badge.success:before{background:var(--ok)}
+.badge.error:before{background:var(--err)}
+@keyframes pulse{50%{opacity:.3}}
+@media(prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+.flow{display:grid;grid-template-columns:repeat(3,1fr);gap:0}
+.step{padding:14px 16px;border-right:1px solid var(--line);position:relative}
+.step:last-child{border-right:0}
+.step .n{display:flex;align-items:center;gap:8px;font-size:13px;font-weight:500}
+.step .n:before{content:"";width:8px;height:8px;border-radius:50%;border:1.5px solid var(--dim);flex:none}
+.step .s{font-size:12px;color:var(--dim);margin-top:2px;padding-left:16px}
+.step.running .n:before{background:var(--run);border-color:var(--run)}
+.step.success .n:before{background:var(--ok);border-color:var(--ok)}
+.step.error .n:before{background:var(--err);border-color:var(--err)}
+.step.running .s{color:var(--run)}.step.success .s{color:var(--ok)}.step.error .s{color:var(--err)}
+@media(max-width:560px){.flow{grid-template-columns:1fr}.step{border-right:0;border-bottom:1px solid var(--line)}.step:last-child{border-bottom:0}}
+.log{padding:16px 20px;overflow-wrap:anywhere}
+.log .top{display:flex;justify-content:space-between;gap:12px;align-items:flex-start}
+.log h3{font-size:14px;font-weight:600}
+.log .u{font-family:var(--mono);font-size:12px;color:var(--mut);margin-top:4px}
+.log .st{font-family:var(--mono);font-size:12px;flex:none;color:var(--run)}
+.st.ok{color:var(--ok)}.st.bad{color:var(--err)}
+.cap{font-size:12px;color:var(--dim);margin:14px 0 6px}
+pre{font-size:12px;background:var(--bg);border:1px solid var(--line);border-radius:6px;padding:10px 12px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:260px;overflow:auto;color:var(--fg)}
+.empty{padding:28px 20px;text-align:center;color:var(--mut);font-size:13px}
+.empty b{display:block;color:var(--fg);font-weight:500;margin-bottom:2px}
+#logContainer{display:flex;flex-direction:column}
+#logContainer>.card{border-radius:0;border-top-width:0}
+#logContainer>.card:first-child{border-top-width:1px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{font-weight:500;color:var(--dim);text-align:left;padding:8px 12px 8px 0;border-bottom:1px solid var(--line);font-size:12px}
+td{padding:10px 12px 10px 0;border-bottom:1px solid var(--line);color:var(--mut);word-break:break-all}
+td:first-child{color:var(--fg)}
+tr:last-child td{border-bottom:0}
+.tw{overflow-x:auto}
+.ref{display:grid;gap:14px}
+.ref div{display:flex;gap:12px;align-items:baseline;flex-wrap:wrap}
+.m{font-family:var(--mono);font-size:11px;font-weight:600;border:1px solid var(--line);border-radius:4px;padding:1px 6px;min-width:46px;text-align:center}
+.m.post{color:var(--ok)}.m.put{color:var(--run)}.m.get{color:var(--mut)}
+.ref p{color:var(--mut);font-size:13px;flex-basis:100%;padding-left:58px}
+footer{border-top:1px solid var(--line);padding:20px 0;color:var(--dim);font-size:12px;text-align:center}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap bar">
+    <h1>Freestore API Tester</h1>
+    <span class="sub">Upload files and inspect every request</span>
+    <span class="sp"></span>
+    <span class="pill">v1 API</span>
+  </div>
+</header>
+
+<main class="wrap">
+  <section class="col">
+    <div class="card">
+      <div class="hd"><h2>Configuration</h2><p>Your endpoint and credentials.</p></div>
+      <div class="bd">
+        <div class="field">
+          <label class="l" for="baseUrl">API base URL</label>
+          <input id="baseUrl" type="text" value="https://apif.omrudra.tech/api/v1" placeholder="https://example.com/api/v1" />
+        </div>
+        <div class="field">
+          <label class="l" for="apiKey">API key</label>
+          <div class="row">
+            <input id="apiKey" type="password" autocomplete="off" placeholder="sk_live_xxxxxxxxxxxx" />
+            <button id="toggleKey" type="button">Show</button>
+          </div>
+          <p class="help warn">Use a development key if possible. The key is never saved.</p>
+        </div>
+        <div class="field">
+          <label class="l" for="uploadUrlOverride">Upload URL override <span style="color:var(--dim);font-weight:400">(optional)</span></label>
+          <input id="uploadUrlOverride" type="text" placeholder="Leave blank to use the returned uploadUrl" />
+          <p class="help">The raw file upload uses the exact uploadUrl returned by the API. Set this only to test a different upload endpoint.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="hd"><h2>File</h2><p>Choose a file or drop it below.</p></div>
+      <div class="bd">
+        <label id="dropZone" class="drop">
+          <input id="fileInput" type="file" />
+          <b>Select a file</b>
+          <span>or drag and drop it here</span>
+        </label>
+        <div id="fileInfo" class="file" hidden>
+          <div><div id="fileName" class="nm"></div><div id="fileMeta" class="mt"></div></div>
+          <button id="removeFile" class="link" type="button" aria-label="Remove file">Remove</button>
+        </div>
+        <div class="prog">
+          <div class="t"><span id="progressLabel">Upload progress</span><span id="progressPercent">0%</span></div>
+          <div class="track"><i id="progressBar"></i></div>
+        </div>
+        <div class="acts">
+          <button id="uploadBtn" class="primary block" type="button">Start upload</button>
+          <button id="listBtn" class="block" type="button">Fetch file list</button>
+          <button id="clearBtn" class="link block" type="button">Clear log</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="col">
+    <div class="card">
+      <div class="hd" style="display:flex;justify-content:space-between;align-items:center;gap:12px">
+        <div><h2>Workflow</h2><p>Live request and response details.</p></div>
+        <span id="statusBadge" class="badge">Ready</span>
+      </div>
+      <div class="flow">
+        <div id="s1" class="step"><div class="n">Initiate</div><div id="s1t" class="s">Waiting</div></div>
+        <div id="s2" class="step"><div class="n">Upload bytes</div><div id="s2t" class="s">Waiting</div></div>
+        <div id="s3" class="step"><div class="n">List files</div><div id="s3t" class="s">Waiting</div></div>
+      </div>
+    </div>
+
+    <div id="logContainer">
+      <div class="card empty"><b>No requests yet</b>Add your API key, select a file and start the upload.</div>
+    </div>
+
+    <div class="card">
+      <div class="hd" style="display:flex;justify-content:space-between;align-items:center">
+        <h2>Files</h2><span id="fileCount" class="help" style="margin:0">Not loaded</span>
+      </div>
+      <div class="bd" id="filesResult" style="color:var(--mut)">Fetch the list to see your files here.</div>
+    </div>
+
+    <div class="card">
+      <div class="hd"><h2>API reference</h2></div>
+      <div class="bd ref">
+        <div><span class="m post">POST</span><code>/uploads/initiate</code><p>Send filename, mimeType and fileSize.</p></div>
+        <div><span class="m put">PUT</span><code>uploadUrl</code><p>Send the raw file bytes with their content type.</p></div>
+        <div><span class="m get">GET</span><code>/files</code><p>Retrieve the file listing.</p></div>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>Credentials stay in page memory only.</footer>
+
+<script>
+(()=>{
+const $=id=>document.getElementById(id);
+let file=null,busy=false;
+
+const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const fmt=b=>b<1024?b+' B':b<1048576?(b/1024).toFixed(1)+' KB':b<1073741824?(b/1048576).toFixed(2)+' MB':(b/1073741824).toFixed(2)+' GB';
+const redact=(t,k)=>k?String(t).split(k).join('[REDACTED]'):t;
+const keyVal=()=>$('apiKey').value.trim();
+
+function setStatus(t,k=''){const b=$('statusBadge');b.textContent=t;b.className='badge '+k}
+function setStep(n,t,k=''){$('s'+n).className='step '+k;$('s'+n+'t').textContent=t}
+function resetSteps(){[1,2,3].forEach(n=>setStep(n,'Waiting'))}
+function progress(v,l='Upload progress'){v=Math.max(0,Math.min(100,v));$('progressBar').style.width=v+'%';$('progressPercent').textContent=Math.round(v)+'%';$('progressLabel').textContent=l}
+function setSt(el,text,cls){const s=el.querySelector('.st');s.textContent=text;s.className='st '+cls}
+
+function addLog(title,method,url,status,req,res){
+  const e=$('logContainer').querySelector('.empty');if(e)e.remove();
+  const el=document.createElement('article');
+  el.className='card log';
+  el.innerHTML=`<div class="top"><div><h3>${esc(title)}</h3><div class="u">${esc(method)} ${esc(url)}</div></div><span class="st">${esc(status)}</span></div>
+  <div class="cap">Request</div><pre>${esc(req)}</pre><div class="cap">Response</div><pre class="res">${esc(res)}</pre>`;
+  $('logContainer').prepend(el);
+  return el;
+}
+
+async function readResponse(r){
+  const text=await r.text();
+  if(!text)return{raw:'',data:null};
+  try{return{raw:text,data:JSON.parse(text)}}catch{return{raw:text,data:null}}
+}
+
+function getBase(){
+  const raw=$('baseUrl').value.trim().replace(/\/+$/,'');
+  if(!raw)throw new Error('Enter the API base URL.');
+  const u=new URL(raw);
+  if(u.protocol!=='https:'&&u.hostname!=='localhost'&&u.hostname!=='127.0.0.1')throw new Error('Use HTTPS for API requests.');
+  return raw;
+}
+function getKey(){const k=keyVal();if(!k)throw new Error('Paste your API key first.');return k}
+const authHeaders=k=>({Authorization:'Bearer '+k});
+
+function uploadInfo(d){
+  const r=d?.data??d;
+  return{uploadUrl:r?.uploadUrl??r?.upload_url??r?.url,token:r?.token??r?.uploadToken??r?.upload_token};
+}
+
+async function requestJSON({title,method,url,headers,body,step}){
+  setStep(step,'Requesting…','running');
+  const el=addLog(title,method,url,'In progress',body===undefined?'(No body)':JSON.stringify(body,null,2),'Waiting for server…');
+  try{
+    const res=await fetch(url,{method,headers,...(body===undefined?{}:{body:JSON.stringify(body)})});
+    const r=await readResponse(res);
+    const text=redact(r.raw||'(Empty response)',keyVal());
+    setSt(el,res.status+' '+res.statusText,res.ok?'ok':'bad');
+    el.querySelector('.res').textContent=text;
+    if(!res.ok)throw new Error('HTTP '+res.status+': '+text.slice(0,800));
+    setStep(step,'Done · HTTP '+res.status,'success');
+    return r.data;
+  }catch(err){
+    setSt(el,'Failed','bad');
+    el.querySelector('.res').textContent=redact(err.message||String(err),keyVal())+'\n\nCheck the API’s CORS settings, network access and endpoint.';
+    setStep(step,'Failed','error');
+    throw err;
+  }
+}
+
+function setFile(f){
+  file=f||null;
+  $('fileInfo').hidden=!file;
+  if(file){
+    $('fileName').textContent=file.name;
+    $('fileMeta').textContent=(file.type||'application/octet-stream')+' · '+fmt(file.size);
+  }
+}
+$('fileInput').addEventListener('change',e=>setFile(e.target.files?.[0]));
+$('removeFile').addEventListener('click',()=>{setFile(null);$('fileInput').value=''});
+$('toggleKey').addEventListener('click',()=>{
+  const i=$('apiKey'),show=i.type==='password';
+  i.type=show?'text':'password';
+  $('toggleKey').textContent=show?'Hide':'Show';
+});
+const drop=$('dropZone');
+drop.addEventListener('dragover',e=>{e.preventDefault();drop.classList.add('over')});
+drop.addEventListener('dragleave',()=>drop.classList.remove('over'));
+drop.addEventListener('drop',e=>{e.preventDefault();drop.classList.remove('over');if(e.dataTransfer.files?.[0])setFile(e.dataTransfer.files[0])});
+
+function renderFiles(data){
+  const root=data?.data??data;
+  const files=Array.isArray(root)?root:root?.files??root?.items??root?.results??null;
+  const out=$('filesResult');
+  if(!Array.isArray(files)){
+    $('fileCount').textContent='Response received';
+    out.innerHTML='<pre></pre>';
+    out.querySelector('pre').textContent=JSON.stringify(data,null,2);
+    return;
+  }
+  $('fileCount').textContent=files.length+(files.length===1?' file':' files');
+  if(!files.length){out.textContent='No files found.';return}
+  out.innerHTML='<div class="tw"><table><thead><tr><th>Filename</th><th>Type</th><th>Size</th></tr></thead><tbody id="fileRows"></tbody></table></div>';
+  const tb=$('fileRows');
+  files.forEach(f=>{
+    const name=f.filename??f.name??f.originalName??f.id??'Unnamed file';
+    const type=f.mimeType??f.mime_type??f.contentType??'—';
+    const size=Number(f.fileSize??f.size??f.sizeBytes);
+    const tr=document.createElement('tr');
+    tr.innerHTML=`<td>${esc(name)}</td><td>${esc(type)}</td><td>${Number.isFinite(size)?esc(fmt(size)):'—'}</td>`;
+    tb.appendChild(tr);
+  });
+}
+
+async function fetchFilesInternal(base,key,step=3){
+  const data=await requestJSON({title:step===3?'Step 3 — List files':'List files',method:'GET',url:base+'/files',headers:authHeaders(key),step});
+  renderFiles(data);
+  return data;
+}
+
+async function runUpload(){
+  if(busy)return;
+  busy=true;
+  $('uploadBtn').disabled=$('listBtn').disabled=true;
+  $('filesResult').textContent='Waiting for upload workflow…';
+  resetSteps();progress(0);setStatus('Running','running');
+  let key;
+  try{
+    key=getKey();
+    const base=getBase();
+    if(!file)throw new Error('Choose a file to upload.');
+
+    const initData=await requestJSON({
+      title:'Step 1 — Initiate upload',method:'POST',url:base+'/uploads/initiate',
+      headers:{...authHeaders(key),'Content-Type':'application/json'},
+      body:{filename:file.name,mimeType:file.type||'application/octet-stream',fileSize:file.size},
+      step:1
+    });
+    if(!initData)throw new Error('The initiate endpoint returned no JSON data.');
+
+    const info=uploadInfo(initData);
+    const override=$('uploadUrlOverride').value.trim();
+    if(!override&&!info.uploadUrl)throw new Error('Upload initiation succeeded, but uploadUrl was not found in the response. Inspect Step 1 and update uploadInfo() to match your API schema.');
+
+    const tu=new URL(override||info.uploadUrl,base);
+    if(tu.protocol!=='https:'&&tu.hostname!=='localhost'&&tu.hostname!=='127.0.0.1')throw new Error('The returned upload URL must use HTTPS.');
+
+    setStep(2,'Uploading…','running');
+    progress(0,'Uploading file bytes');
+    const ph={'Content-Type':file.type||'application/octet-stream'};
+    if(info.token)ph.Authorization='Bearer '+info.token;
+    else if(!info.uploadUrl||override)ph.Authorization='Bearer '+key;
+
+    const el=addLog('Step 2 — Upload raw bytes','PUT',tu.href,'In progress',
+      'Raw file: '+file.name+'\nContent-Type: '+ph['Content-Type']+'\nContent-Length: '+file.size+' bytes\nAuthorization: '+(ph.Authorization?'[REDACTED]':'(not sent)'),
+      'Sending file bytes…');
+    let got=false;
+    try{
+      const r=await new Promise((resolve,reject)=>{
+        const x=new XMLHttpRequest();
+        x.open('PUT',tu.href);
+        Object.entries(ph).forEach(([k,v])=>x.setRequestHeader(k,v));
+        x.upload.onprogress=ev=>{if(ev.lengthComputable)progress(ev.loaded/ev.total*100,'Uploading file bytes')};
+        x.onload=()=>resolve({status:x.status,statusText:x.statusText,text:x.responseText});
+        x.onerror=()=>reject(new Error('Upload request failed. Check CORS, the upload URL and network access.'));
+        x.onabort=()=>reject(new Error('Upload aborted.'));
+        x.send(file);
+      });
+      got=true;
+      const ok=r.status>=200&&r.status<300;
+      setSt(el,r.status+' '+r.statusText,ok?'ok':'bad');
+      el.querySelector('.res').textContent=r.text||'(Empty response)';
+      if(!ok)throw new Error('File upload failed with HTTP '+r.status+(r.text?'\nServer response: '+r.text:''));
+      setStep(2,'Done · HTTP '+r.status,'success');
+      progress(100,'Upload completed');
+    }catch(err){
+      setSt(el,'Failed','bad');
+      if(!got)el.querySelector('.res').textContent=redact(err.message||String(err),key);
+      setStep(2,'Failed','error');
+      throw err;
+    }
+
+    await fetchFilesInternal(base,key,3);
+    setStatus('Workflow completed','success');
+  }catch(err){
+    setStatus('Workflow failed','error');
+    const el=addLog('Workflow error','CLIENT','-','Failed','(No additional request)',redact(err.message||String(err),key||''));
+    setSt(el,'Failed','bad');
+  }finally{
+    busy=false;
+    $('uploadBtn').disabled=$('listBtn').disabled=false;
+  }
+}
+
+$('uploadBtn').addEventListener('click',runUpload);
+
+$('listBtn').addEventListener('click',async()=>{
+  if(busy)return;
+  busy=true;$('listBtn').disabled=true;
+  setStatus('Fetching files','running');
+  try{
+    const base=getBase(),key=getKey();
+    await fetchFilesInternal(base,key,3);
+    setStatus('Files loaded','success');
+  }catch(err){
+    setStatus('Request failed','error');
+    $('filesResult').textContent=redact(err.message,keyVal());
+  }finally{
+    busy=false;$('listBtn').disabled=false;
+  }
+});
+
+$('clearBtn').addEventListener('click',()=>{
+  $('logContainer').innerHTML='<div class="card empty"><b>No requests yet</b>Add your API key, select a file and start the upload.</div>';
+  resetSteps();setStatus('Ready');progress(0);
+});
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,17 @@
+import { jsx as _jsx, jsxs as _jsxs, Fragment as _Fragment } from "react/jsx-runtime";
+import { useQuery } from '@tanstack/react-query';
+import { AlertTriangle, Download, FileText, Files, LockKeyhole } from 'lucide-react';
+import { Link, useParams } from 'react-router-dom';
+import { getPublicFile, getPublicFileContentUrl } from '../api/shares';
+import { formatBytes, formatDate, isImage } from '../utils/format';
+export default function PublicSharePage() {
+    const { token = '' } = useParams();
+    const { data: file, isLoading, isError } = useQuery({
+        queryKey: ['public-file', token],
+        queryFn: () => getPublicFile(token),
+        enabled: !!token,
+        retry: false,
+    });
+    const contentUrl = getPublicFileContentUrl(token);
+    return (_jsxs("main", { className: "min-h-screen bg-[#080a0b] text-[#ededed]", children: [_jsxs("header", { className: "h-14 border-b border-[#202526] flex items-center justify-between px-5", children: [_jsxs(Link, { to: "/", className: "flex items-center gap-2 text-sm font-semibold", children: [_jsx(LockKeyhole, { className: "w-4 h-4 text-emerald-400" }), "Free Store"] }), _jsx("span", { className: "text-[10px] uppercase tracking-[0.16em] text-[#788080]", children: "Shared file" })] }), _jsx("section", { className: "max-w-4xl mx-auto px-5 py-12", children: isLoading ? (_jsxs("div", { className: "animate-pulse space-y-4", children: [_jsx("div", { className: "h-5 w-56 bg-[#202526] rounded" }), _jsx("div", { className: "h-[55vh] bg-[#111617] rounded" })] })) : isError || !file ? (_jsxs("div", { className: "max-w-lg mx-auto text-center py-20", children: [_jsx(AlertTriangle, { className: "w-8 h-8 text-amber-400 mx-auto mb-4" }), _jsx("h1", { className: "text-lg font-semibold", children: "This link is unavailable" }), _jsx("p", { className: "mt-2 text-sm text-[#858e8e]", children: "It may have expired or been revoked by the owner." })] })) : (_jsxs(_Fragment, { children: [_jsxs("div", { className: "flex flex-wrap items-center justify-between gap-4 mb-5", children: [_jsxs("div", { className: "flex min-w-0 items-center gap-3", children: [isImage(file.mimeType) ? _jsx(Files, { className: "w-5 h-5 text-sky-400 shrink-0" }) : _jsx(FileText, { className: "w-5 h-5 text-red-400 shrink-0" }), _jsxs("div", { className: "min-w-0", children: [_jsx("h1", { className: "truncate text-base font-semibold", children: file.filename }), _jsxs("p", { className: "text-xs text-[#737c7c]", children: [formatBytes(file.size), " \u00B7 ", file.mimeType, file.expiresAt ? ` · Link expires ${formatDate(file.expiresAt)}` : ''] })] })] }), _jsxs("a", { href: contentUrl, download: file.filename, className: "btn-primary btn-sm", children: [_jsx(Download, { className: "w-3.5 h-3.5" }), "Download"] })] }), file.mimeType === 'application/pdf' ? (_jsx("iframe", { title: file.filename, src: contentUrl, className: "w-full h-[72vh] bg-white border border-[#252d2d] rounded" })) : isImage(file.mimeType) ? (_jsx("div", { className: "min-h-[40vh] flex items-center justify-center bg-[#111617] border border-[#252d2d] rounded p-4", children: _jsx("img", { src: contentUrl, alt: file.filename, className: "max-h-[70vh] max-w-full object-contain" }) })) : (_jsxs("div", { className: "min-h-[35vh] flex flex-col items-center justify-center gap-3 bg-[#111617] border border-[#252d2d] rounded", children: [_jsx(Files, { className: "w-10 h-10 text-[#687272]" }), _jsx("p", { className: "text-sm text-[#aab2b2]", children: "This file is available to download." })] }))] })) })] }));
+}

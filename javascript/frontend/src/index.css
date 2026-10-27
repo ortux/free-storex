@@ -1,0 +1,161 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --sidebar-width: 240px;
+  }
+
+  html { @apply antialiased; }
+
+  body {
+    @apply bg-black text-[#ededed] font-sans;
+    font-size: 14px;
+    min-height: 100vh;
+  }
+
+  * { @apply border-[#2e2e2e]; }
+
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { @apply bg-[#333] rounded-full; }
+  ::-webkit-scrollbar-thumb:hover { @apply bg-[#555]; }
+}
+
+@layer components {
+  /* ── Cards ── */
+  .card {
+    @apply bg-[#111] border border-[#2e2e2e] rounded-lg;
+  }
+  .card-hover {
+    @apply card transition-colors hover:border-[#444] hover:bg-[#161616] cursor-pointer;
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    @apply inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium
+           transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-1
+           focus:ring-offset-black disabled:opacity-40 disabled:pointer-events-none select-none;
+  }
+  .btn-primary {
+    @apply btn bg-white text-black hover:bg-[#e0e0e0] focus:ring-white/50;
+  }
+  .btn-secondary {
+    @apply btn bg-transparent text-[#ededed] border border-[#333] hover:bg-[#1a1a1a]
+           hover:border-[#555] focus:ring-white/20;
+  }
+  .btn-ghost {
+    @apply btn bg-transparent text-[#888] hover:text-[#ededed] hover:bg-[#1a1a1a]
+           focus:ring-white/10;
+  }
+  .btn-danger {
+    @apply btn bg-red-600 text-white hover:bg-red-500 focus:ring-red-500/50;
+  }
+  .btn-sm {
+    @apply px-2.5 py-1 text-xs rounded;
+  }
+  .btn-icon {
+    @apply btn p-1.5 text-[#888] hover:text-[#ededed] hover:bg-[#1a1a1a];
+  }
+
+  /* ── Inputs ── */
+  .input {
+    @apply w-full px-3 py-1.5 bg-[#111] border border-[#333] rounded-md text-sm
+           text-[#ededed] placeholder-[#666]
+           focus:outline-none focus:border-[#555] focus:ring-1 focus:ring-[#555]
+           transition-colors;
+  }
+  .select {
+    @apply input appearance-none cursor-pointer pr-8;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 24 24' fill='none' stroke='%23666' stroke-width='2'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+
+  /* ── Badges ── */
+  .badge {
+    @apply inline-flex items-center gap-1 px-1.5 py-0.5 rounded text-xs font-medium;
+  }
+  .badge-gray   { @apply badge bg-[#222] text-[#888] border border-[#333]; }
+  .badge-blue   { @apply badge bg-blue-500/10 text-blue-400 border border-blue-500/20; }
+  .badge-green  { @apply badge bg-emerald-500/10 text-emerald-400 border border-emerald-500/20; }
+  .badge-amber  { @apply badge bg-amber-500/10 text-amber-400 border border-amber-500/20; }
+  .badge-red    { @apply badge bg-red-500/10 text-red-400 border border-red-500/20; }
+  .badge-purple { @apply badge bg-purple-500/10 text-purple-400 border border-purple-500/20; }
+
+  /* ── Table ── */
+  .table-row {
+    @apply border-b border-[#1a1a1a] hover:bg-[#111] transition-colors;
+  }
+  .table-header {
+    @apply text-xs text-[#666] font-medium uppercase tracking-wider px-4 py-2
+           border-b border-[#1a1a1a];
+  }
+  .table-cell {
+    @apply px-4 py-3 text-sm text-[#ccc];
+  }
+
+  /* ── Sidebar ── */
+  .sidebar-item {
+    @apply flex items-center gap-2.5 px-3 py-1.5 rounded-md text-sm text-[#888]
+           hover:text-[#ededed] hover:bg-[#1a1a1a] transition-colors cursor-pointer
+           w-full text-left;
+  }
+  .sidebar-item-active {
+    @apply sidebar-item text-[#ededed] bg-[#1a1a1a];
+  }
+
+  /* ── Section header ── */
+  .section-header {
+    @apply flex items-center justify-between mb-4;
+  }
+  .section-title {
+    @apply text-sm font-semibold text-[#ededed];
+  }
+
+  /* ── Stat card ── */
+  .stat-card {
+    @apply card p-4 flex flex-col gap-1;
+  }
+  .stat-label {
+    @apply text-xs text-[#666] flex items-center gap-1.5;
+  }
+  .stat-value {
+    @apply text-2xl font-semibold text-[#ededed] tabular-nums;
+  }
+  .stat-sub {
+    @apply text-xs text-[#555];
+  }
+
+  /* ── Progress bar ── */
+  .progress-track {
+    @apply w-full bg-[#222] rounded-full overflow-hidden;
+  }
+  .progress-fill {
+    @apply h-full rounded-full transition-all duration-500;
+  }
+
+  /* ── Empty state ── */
+  .empty-state {
+    @apply flex flex-col items-center justify-center py-20 text-center gap-3;
+  }
+  .empty-icon {
+    @apply w-10 h-10 text-[#333];
+  }
+  .empty-title {
+    @apply text-sm font-medium text-[#555];
+  }
+  .empty-sub {
+    @apply text-xs text-[#444] max-w-xs;
+  }
+
+  /* ── Divider ── */
+  .divider { @apply border-t border-[#1e1e1e]; }
+
+  /* ── Code block ── */
+  .code-block {
+    @apply bg-[#0a0a0a] border border-[#222] rounded-lg p-4 font-mono text-xs
+           text-[#aaa] overflow-x-auto leading-relaxed;
+  }
+}
